@@ -1,0 +1,30 @@
+[project]
+name = "daytradeai"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "fastparquet>=2024.11.0",
+    "h5py>=3.12.1",
+    "ipython>=8.31.0",
+    "jupyter>=1.1.1",
+    "matplotlib>=3.10.0",
+    "numpy>=2.2.1",
+    "pandas>=2.2.3",
+    "pyarrow>=19.0.0",
+    "scikit-learn>=1.6.1",
+    "scipy>=1.15.1",
+    "torch>=2.5.1",
+    "torchvision>=0.20.1",
+    "yfinance>=0.2.51",
+]
+
+[dependency-groups]
+dev = [
+    "black>=24.10.0",
+    "flake8>=7.1.1",
+    "ipykernel>=6.29.5",
+    "pytest>=8.3.4",
+    "typing>=3.10.0.0",
+]
