@@ -8,8 +8,8 @@ from daytradeai.stocks import get_tickers
 basicConfig(
     level=INFO, 
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
-     datefmt="%Y-%m-%d %H:%M"  # remove seconds and milliseconds
-     )
+    datefmt="%Y-%m-%d %H:%M"  # remove seconds and milliseconds
+)
 logger = getLogger(__name__)
 
 
@@ -26,7 +26,7 @@ def preprocess_data(
 
     for lag_feat in preprocess_cfg["lag_feats"]:
         df = add_lag_feat(
-            df, tickers_plus_cash, lag_feat, preprocess_cfg["trading_day_lags"]
+            df=df, tickers=tickers_plus_cash, feat=lag_feat, anchor_days=preprocess_cfg["anchor_days"], lag_days=preprocess_cfg["lag_days"]
         )
     df = label_beat_index_1d(df, tickers_plus_cash, preprocess_cfg)
     return df
@@ -38,18 +38,20 @@ def add_cash_fund(df: pd.DataFrame) -> pd.DataFrame:
     return df
 
 
-def add_lag_feat(df, tickers, feat, trading_day_lags):
+def add_lag_feat(df, tickers, feat, anchor_days, lag_days):
     logger.info(f"Adding {feat} lag features")
-    for lag in trading_day_lags:
-        for col in tickers:
-            cur = df[col]
-            past = cur.shift(lag)
-            if feat == "lag":
-                df[f"{col}_{feat}_{lag}d"] = past
-            elif feat == "diff":
-                df[f"{col}_{feat}_{lag}d"] = cur - past
-            elif feat == "pdiff":
-                df[f"{col}_{feat}_{lag}d"] = 100.0 * (cur - past) / past
+    for anchor in anchor_days:
+        for lag in lag_days:
+            for col in tickers:
+                cur = df[col]
+                past = cur.shift(lag)
+                feature_name = f"{col}_{feat}_{anchor}d_{lag}d"
+                if feat == "lag":
+                    df[feature_name] = past
+                elif feat == "diff":
+                    df[feature_name] = cur - past
+                elif feat == "pdiff":
+                    df[feature_name] = 100.0 * (cur - past) / past
     return df
 
 
@@ -67,7 +69,7 @@ def label_beat_index_1d(
     # index performance
     for stock in stocks:
         # get next days performance of each stock in index
-        df[f"label_{stock}_pdiff_1f"] = df[f"{stock}_pdiff_1d"].shift(-1)
+        df[f"label_{stock}_pdiff_1f"] = df[f"{stock}_pdiff_0d_1d"].shift(-1)
     # assume index is equally weighted -
     # note this is note how DIJA or S&P500 is calculated (DIJA is price weighted, with divisor, S&P500 is market cap weighted)
     index_performance = df[[f"label_{stock}_pdiff_1f" for stock in stocks]].mean(axis=1)
@@ -87,5 +89,13 @@ def save_preprocessed(df: pd.DataFrame, cfg: Dict[str, Any]) -> None:
     output = os.path.join(cfg['data_dir'], latest_day + '.parquet')
     if os.path.exists(output):
         logger.info(f"Overwriting preprocessed data: {output}")
-    logger.info(f"Saving preprocessed data to {output}")
+    else:
+        logger.info(f"Saving preprocessed data to {output}")
     df.to_parquet(output)
+
+
+def get_feature_columns(df: pd.DataFrame, suffix: str, tickers: List[str]) -> List[str]:
+    cols = [col for col in df.columns if col.endswith(suffix) and col.split('_')[0] in tickers]
+    assert len(cols) > 0, f'No columns ending with {suffix} and starting with strings in tickers found, tickers={tickers[0:3] } ... {tickers[-3:]}'
+    return cols
+

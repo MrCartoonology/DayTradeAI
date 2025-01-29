@@ -5,7 +5,11 @@ import daytradeai.config as config
 import daytradeai.preprocess as preprocess
 
 
-basicConfig(level=INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s")
+basicConfig(
+    level=INFO, 
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+    datefmt="%Y-%m-%d %H:%M"  # remove seconds and milliseconds
+)
 logger = getLogger(__name__)
 
 

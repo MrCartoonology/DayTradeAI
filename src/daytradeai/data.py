@@ -9,7 +9,11 @@ import yfinance as yf
 from daytradeai.stocks import get_tickers
 
 
-basicConfig(level=INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s")
+basicConfig(
+    level=INFO, 
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+    datefmt="%Y-%m-%d %H:%M"  # remove seconds and milliseconds
+)
 logger = getLogger(__name__)
 
 
