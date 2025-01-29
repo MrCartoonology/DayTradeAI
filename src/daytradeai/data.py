@@ -20,6 +20,14 @@ def get_stock_download_dir(cfg: Dict[str, str]) -> str:
 
 
 def get_downloaded_data(cfg: Dict[str, str]) -> Optional[pd.DataFrame]:
+    """returns all downloaded data (if any) as a single dataframe
+
+    Args:
+        cfg (Dict[str, str]): data configuration
+
+    Returns:
+        Optional[pd.DataFrame]: all downloaded data as a single dataframe
+    """
 
     stock_download_dir = get_stock_download_dir(cfg=cfg)
     timestamped_files = glob.glob(os.path.join(stock_download_dir, "*.parquet"))

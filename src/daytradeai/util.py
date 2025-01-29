@@ -1,8 +1,5 @@
-import numpy as np
-import pandas as pd
 from scipy.stats import ks_2samp, ttest_ind
 from scipy.stats import mannwhitneyu
-import yfinance
 
 
 def get_num_periods(interval: str) -> float:
@@ -34,7 +31,3 @@ def goodnes_fit_tests(sample, population):
         stat, pval = fn(sample, population)
         res[stat_name] = dict(pval=pval, stat=stat)
     return res
-
-
-def random_stock_picker(df: pd.DataFrame, tickers: yfinance.Tickers) -> pd.DataFrame:
-    last_df.index.max()
