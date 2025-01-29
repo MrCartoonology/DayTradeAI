@@ -25,7 +25,10 @@ def get_downloaded_data(cfg: Dict[str, str]) -> Optional[pd.DataFrame]:
 
     if timestamped_files:
         logger.info(f"Reading {len(timestamped_files)} files from {stock_download_dir}")
-        return pd.concat([pd.read_parquet(file) for file in timestamped_files], axis=1)
+        df = pd.read_parquet(timestamped_files.pop())
+        for fname in timestamped_files:
+            df = pd.combine_first(pd.read_parquet(fname))
+        return df
     logger.warning(f"No files found in {stock_download_dir}")
     return None
 
@@ -60,3 +63,11 @@ def save_downloaded_data(df: Optional[pd.DataFrame], cfg: Dict[str, str]) -> Non
         df.to_parquet(file_path)
     else:
         logger.warning("No data to save")
+
+
+def combine_dataframes(df_current: pd.DataFrame, df_new: Union[pd.DataFrame, None]) -> pd.DataFrame:
+    if df_new is None:
+        return df_current
+    return df_current.combine_first(df_new)
+
+

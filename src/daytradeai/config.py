@@ -17,10 +17,12 @@ cfg_preprocess = dict(
     price='Open',
     trading_day_lags=[1, 2, 3, 4, 5, 10, 15, 20, 25, 30, 60, 90, 120, 150, 180, 210, 240],
     lag_feats=['diff', 'pdiff', 'lag'],  # only need lag for a deep neural network?
+    data_dir='/Users/davidschneider/data/daytradeai/prd/preprocessed',
+
 )
 
 cfg = dict(
-    data=cfg_data
+    data=cfg_data,
     preprocess=cfg_preprocess
 )
 
