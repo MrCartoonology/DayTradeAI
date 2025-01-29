@@ -1,4 +1,4 @@
-from typing import Dict, Optional, Union
+from typing import Any, Dict, Optional
 import os
 import glob
 from logging import getLogger, basicConfig, INFO
@@ -19,7 +19,7 @@ def get_stock_download_dir(cfg: Dict[str, str]) -> str:
     return loc
 
 
-def get_downloaded_data(cfg: Dict[str, str]) -> Optional[pd.DataFrame]:
+def get_downloaded_data(cfg: Dict[str, str]) -> pd.DataFrame:
     """returns all downloaded data (if any) as a single dataframe
 
     Args:
@@ -36,32 +36,30 @@ def get_downloaded_data(cfg: Dict[str, str]) -> Optional[pd.DataFrame]:
         logger.info(f"Reading {len(timestamped_files)} files from {stock_download_dir}")
         df = pd.read_parquet(timestamped_files.pop())
         for fname in timestamped_files:
-            df = pd.combine_first(pd.read_parquet(fname))
+            df = df.combine_first(pd.read_parquet(fname))
         return df
     logger.warning(f"No files found in {stock_download_dir}")
-    return None
+    return pd.DataFrame()
 
 
-def get_new_data(
-    cfg: Dict[str, str], df_current: Optional[pd.DataFrame] = None
-) -> pd.DataFrame:
+def get_new_data(cfg: Dict[str, Any], df_current: pd.DataFrame) -> pd.DataFrame:
     tickers = yf.Tickers(get_tickers(cfg["stocks"], num_tickers=cfg["num_tickers"]))
-    if df_current is None:
+    if df_current.empty:
         logger.info("Fetching new data from scratch")
         df_new = tickers.history(period=cfg["period"], interval=cfg["interval"])
-        df_new = df_new.dropna()
+        df_new = df_new.dropna() if df_new is not None else pd.DataFrame()
     else:
         last_date = df_current.index.max()
         start = last_date + pd.Timedelta(days=1)
         if start > pd.Timestamp.now().normalize():
             logger.info("No new data to fetch")
-            return None
+            return pd.DataFrame()
         logger.info(f"Fetching new data starting from {start}")
         df_new = tickers.history(start=start, interval=cfg["interval"])
-        df_new = df_new.dropna()
+        df_new = df_new.dropna() if df_new is not None else pd.DataFrame()
         if df_new.empty:
             logger.warning("No new data found")
-            return None
+            return pd.DataFrame()
     return df_new
 
 
@@ -76,9 +74,7 @@ def save_downloaded_data(df: Optional[pd.DataFrame], cfg: Dict[str, str]) -> Non
         logger.warning("No data to save")
 
 
-def combine_dataframes(
-    df_current: pd.DataFrame, df_new: Union[pd.DataFrame, None]
-) -> pd.DataFrame:
-    if df_new is None:
+def combine_dataframes(df_current: pd.DataFrame, df_new: pd.DataFrame) -> pd.DataFrame:
+    if df_new.empty:
         return df_current
     return df_current.combine_first(df_new)
