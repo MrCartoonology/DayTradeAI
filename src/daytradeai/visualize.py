@@ -10,7 +10,7 @@ def hist_pdiff_1d(df: pd.DataFrame) -> None:
     """
     pdiffs_cols = [col for col in df.columns if col.endswith("_today_pdiff_1d")]
     assert len(pdiffs_cols) > 0, 'No columns ending with "_today_pdiff_1d" found'
-    pdiffs = np.concatenate([df[col].values for col in pdiffs_cols])
+    pdiffs = np.concatenate([df[col].values for col in pdiffs_cols]) # type: ignore
     plt.hist(
         pdiffs,
         bins=400,

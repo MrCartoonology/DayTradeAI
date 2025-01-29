@@ -1,10 +1,15 @@
 from logging import getLogger, basicConfig, INFO
+import os
 from typing import Any, Dict, List
 import pandas as pd
 from daytradeai.stocks import get_tickers
 
 
-basicConfig(level=INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s")
+basicConfig(
+    level=INFO, 
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+     datefmt="%Y-%m-%d %H:%M"  # remove seconds and milliseconds
+     )
 logger = getLogger(__name__)
 
 
@@ -77,4 +82,10 @@ def label_beat_index_1d(
 
 
 def save_preprocessed(df: pd.DataFrame, cfg: Dict[str, Any]) -> None:
-    pass
+    latest_day = df.index.max().strftime("%Y-%m-%d")
+    os.makedirs(cfg['data_dir'], exist_ok=True)
+    output = os.path.join(cfg['data_dir'], latest_day + '.parquet')
+    if os.path.exists(output):
+        logger.info(f"Overwriting preprocessed data: {output}")
+    logger.info(f"Saving preprocessed data to {output}")
+    df.to_parquet(output)

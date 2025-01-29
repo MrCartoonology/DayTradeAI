@@ -36,6 +36,3 @@ exclude = ["**/*.ipynb"]
 
 [tool.flake8]
 max-line-length = 150
-
-[tool.pyright]
-exclude = ["**/*.ipynb"]
