@@ -6,10 +6,10 @@ from daytradeai.stocks import get_tickers
 
 
 basicConfig(
-    level=INFO, 
+    level=INFO,
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
-    datefmt="%Y-%m-%d %H:%M"  # remove seconds and milliseconds
-)
+    datefmt="%Y-%m-%d %H:%M",
+)  # remove seconds and milliseconds
 logger = getLogger(__name__)
 
 
@@ -26,7 +26,11 @@ def preprocess_data(
 
     for lag_feat in preprocess_cfg["lag_feats"]:
         df = add_lag_feat(
-            df=df, tickers=tickers_plus_cash, feat=lag_feat, anchor_days=preprocess_cfg["anchor_days"], lag_days=preprocess_cfg["lag_days"]
+            df=df,
+            tickers=tickers_plus_cash,
+            feat=lag_feat,
+            anchor_days=preprocess_cfg["anchor_days"],
+            lag_days=preprocess_cfg["lag_days"],
         )
     df = label_beat_index_1d(df, tickers_plus_cash, preprocess_cfg)
     return df
@@ -76,17 +80,17 @@ def label_beat_index_1d(
 
     # create labels for each stock, 0/1 for
     for stock in stocks:
-        df[f"label_{stock}"] = (
-            df[f"label_{stock}_pdiff_1f"] > index_performance
-        ).astype(int)
+        df[f"label_{stock}"] = (df[f"label_{stock}_pdiff_1f"] > index_performance).astype(
+            int
+        )
 
     return df
 
 
 def save_preprocessed(df: pd.DataFrame, cfg: Dict[str, Any]) -> None:
     latest_day = df.index.max().strftime("%Y-%m-%d")
-    os.makedirs(cfg['data_dir'], exist_ok=True)
-    output = os.path.join(cfg['data_dir'], latest_day + '.parquet')
+    os.makedirs(cfg["data_dir"], exist_ok=True)
+    output = os.path.join(cfg["data_dir"], latest_day + ".parquet")
     if os.path.exists(output):
         logger.info(f"Overwriting preprocessed data: {output}")
     else:
@@ -95,7 +99,10 @@ def save_preprocessed(df: pd.DataFrame, cfg: Dict[str, Any]) -> None:
 
 
 def get_feature_columns(df: pd.DataFrame, suffix: str, tickers: List[str]) -> List[str]:
-    cols = [col for col in df.columns if col.endswith(suffix) and col.split('_')[0] in tickers]
-    assert len(cols) > 0, f'No columns ending with {suffix} and starting with strings in tickers found, tickers={tickers[0:3] } ... {tickers[-3:]}'
+    cols = [
+        col for col in df.columns if col.endswith(suffix) and col.split("_")[0] in tickers
+    ]
+    assert (
+        len(cols) > 0
+    ), f"No columns ending with {suffix} and starting with strings in tickers found, tickers={tickers[0:3] } ... {tickers[-3:]}"
     return cols
-
