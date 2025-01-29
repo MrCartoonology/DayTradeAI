@@ -1,4 +1,4 @@
-from typing import Dict, Optional
+from typing import Dict, Optional, Union
 import os
 import glob
 from logging import getLogger, basicConfig, INFO
@@ -9,17 +9,18 @@ import yfinance as yf
 from daytradeai.stocks import get_tickers
 
 
-basicConfig(level=INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+basicConfig(level=INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s")
 logger = getLogger(__name__)
 
 
 def get_stock_download_dir(cfg: Dict[str, str]) -> str:
-    loc = os.path.join(cfg['data_dir'], cfg['stocks'])
+    loc = os.path.join(cfg["data_dir"], cfg["stocks"])
     os.makedirs(loc, exist_ok=True)
     return loc
 
 
 def get_downloaded_data(cfg: Dict[str, str]) -> Optional[pd.DataFrame]:
+
     stock_download_dir = get_stock_download_dir(cfg=cfg)
     timestamped_files = glob.glob(os.path.join(stock_download_dir, "*.parquet"))
 
@@ -33,11 +34,13 @@ def get_downloaded_data(cfg: Dict[str, str]) -> Optional[pd.DataFrame]:
     return None
 
 
-def get_new_data(cfg: Dict[str, str], df_current: Optional[pd.DataFrame] = None) -> pd.DataFrame:
-    tickers = yf.Tickers(get_tickers(cfg['stocks'], num_tickers=cfg['num_tickers']))
+def get_new_data(
+    cfg: Dict[str, str], df_current: Optional[pd.DataFrame] = None
+) -> pd.DataFrame:
+    tickers = yf.Tickers(get_tickers(cfg["stocks"], num_tickers=cfg["num_tickers"]))
     if df_current is None:
         logger.info("Fetching new data from scratch")
-        df_new = tickers.history(period=cfg['period'], interval=cfg['interval'])
+        df_new = tickers.history(period=cfg["period"], interval=cfg["interval"])
         df_new = df_new.dropna()
     else:
         last_date = df_current.index.max()
@@ -45,8 +48,8 @@ def get_new_data(cfg: Dict[str, str], df_current: Optional[pd.DataFrame] = None)
         if start > pd.Timestamp.now().normalize():
             logger.info("No new data to fetch")
             return None
-        logger.info(f"Fetching new data starting from {start}") 
-        df_new = tickers.history(start=start, interval=cfg['interval'])
+        logger.info(f"Fetching new data starting from {start}")
+        df_new = tickers.history(start=start, interval=cfg["interval"])
         df_new = df_new.dropna()
         if df_new.empty:
             logger.warning("No new data found")
@@ -56,7 +59,7 @@ def get_new_data(cfg: Dict[str, str], df_current: Optional[pd.DataFrame] = None)
 
 def save_downloaded_data(df: Optional[pd.DataFrame], cfg: Dict[str, str]) -> None:
     if df is not None and not df.empty:
-        max_date = df.index.max().strftime('%Y-%m-%d')
+        max_date = df.index.max().strftime("%Y-%m-%d")
         stock_download_dir = get_stock_download_dir(cfg=cfg)
         file_path = os.path.join(stock_download_dir, f"{max_date}.parquet")
         logger.info(f"Saving data to {file_path}")
@@ -65,9 +68,9 @@ def save_downloaded_data(df: Optional[pd.DataFrame], cfg: Dict[str, str]) -> Non
         logger.warning("No data to save")
 
 
-def combine_dataframes(df_current: pd.DataFrame, df_new: Union[pd.DataFrame, None]) -> pd.DataFrame:
+def combine_dataframes(
+    df_current: pd.DataFrame, df_new: Union[pd.DataFrame, None]
+) -> pd.DataFrame:
     if df_new is None:
         return df_current
     return df_current.combine_first(df_new)
-
-

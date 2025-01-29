@@ -9,7 +9,7 @@ dow_jones_stocks = [
     {"Company": "Microsoft Corp", "Ticker": "MSFT", "Weight": 6.01},
     {"Company": "Home Depot Inc", "Ticker": "HD", "Weight": 5.68},
     {"Company": "Caterpillar Inc", "Ticker": "CAT", "Weight": 5.37},
-#    {"Company": "Sherwin-Williams Co", "Ticker": "SHW", "Weight": 4.94},
+    #    {"Company": "Sherwin-Williams Co", "Ticker": "SHW", "Weight": 4.94},
     {"Company": "Salesforce Inc", "Ticker": "CRM", "Weight": 4.68},
     {"Company": "Visa Inc Class A Shares", "Ticker": "V", "Weight": 4.47},
     {"Company": "American Express Co", "Ticker": "AXP", "Weight": 4.34},
@@ -26,14 +26,14 @@ dow_jones_stocks = [
     {"Company": "Chevron Corp", "Ticker": "CVX", "Weight": 2.27},
     {"Company": "Johnson & Johnson", "Ticker": "JNJ", "Weight": 2.09},
     {"Company": "3M Co", "Ticker": "MMM", "Weight": 1.98},
- #   {"Company": "Nvidia Corp", "Ticker": "NVDA", "Weight": 1.90},
+    #   {"Company": "Nvidia Corp", "Ticker": "NVDA", "Weight": 1.90},
     {"Company": "Walt Disney Co", "Ticker": "DIS", "Weight": 1.56},
     {"Company": "Merck & Co. Inc.", "Ticker": "MRK", "Weight": 1.44},
     {"Company": "Walmart Inc", "Ticker": "WMT", "Weight": 1.31},
     {"Company": "Nike Inc Cl B", "Ticker": "NKE", "Weight": 1.03},
     {"Company": "Coca-Cola Co", "Ticker": "KO", "Weight": 0.90},
     {"Company": "Cisco Systems Inc", "Ticker": "CSCO", "Weight": 0.86},
-    {"Company": "Verizon Communications Inc", "Ticker": "VZ", "Weight": 0.55}
+    {"Company": "Verizon Communications Inc", "Ticker": "VZ", "Weight": 0.55},
 ]
 
 
@@ -150,14 +150,16 @@ sp_midcap_400_top50 = [
     {"Company": "IQVIA Holdings Inc.", "Ticker": "IQV"},
     {"Company": "Edwards Lifesciences Corp.", "Ticker": "EW"},
     {"Company": "ServiceNow Inc.", "Ticker": "NOW"},
-    {"Company": "Illumina Inc.", "Ticker": "ILMN"}
+    {"Company": "Illumina Inc.", "Ticker": "ILMN"},
 ]
 
 
-_group2stocks = dict(dowjones=dow_jones_stocks, nasdaq=nasdaq_100, spmid=sp_midcap_400_top50)
+_group2stocks = dict(
+    dowjones=dow_jones_stocks, nasdaq=nasdaq_100, spmid=sp_midcap_400_top50
+)
 
 
 def get_tickers(group: str, num_tickers: int = -1) -> List[str]:
-    tickers = [el['Ticker'] for el in _group2stocks[group]]
+    tickers = [el["Ticker"] for el in _group2stocks[group]]
     tickers = tickers[0:num_tickers] if num_tickers > 0 else tickers
     return tickers
