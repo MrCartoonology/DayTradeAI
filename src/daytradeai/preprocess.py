@@ -46,7 +46,9 @@ def get_feat_name(col, feat, anchor, lag):
     return f"{col}_{feat}_{anchor}d_{lag}d"
 
 
-def add_lag_feat(df: pd.DataFrame, tickers: List[str], feat: str, anchor_and_lags: Dict[int, List[int]]) -> pd.DataFrame:
+def add_lag_feat(
+    df: pd.DataFrame, tickers: List[str], feat: str, anchor_and_lags: Dict[int, List[int]]
+) -> pd.DataFrame:
     logger.info(f"Adding {feat} lag features")
     for anchor, lags in anchor_and_lags.items():
         for lag in lags:
@@ -77,7 +79,9 @@ def label_beat_index_1d(
     # index performance
     for stock in stocks:
         # get next days performance of each stock in index
-        df[f"label_{stock}_pdiff_1f"] = df[get_feat_name(col=stock, feat='pdiff', anchor=0, lag=1)].shift(-1)
+        df[f"label_{stock}_pdiff_1f"] = df[
+            get_feat_name(col=stock, feat="pdiff", anchor=0, lag=1)
+        ].shift(-1)
     # assume index is equally weighted -
     # note this is note how DIJA or S&P500 is calculated (DIJA is price weighted, with divisor, S&P500 is market cap weighted)
     index_performance = df[[f"label_{stock}_pdiff_1f" for stock in stocks]].mean(axis=1)

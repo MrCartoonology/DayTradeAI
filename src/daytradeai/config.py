@@ -24,6 +24,7 @@ cfg_preprocess: Dict[str, Any] = dict(
         1: [1],
     },
     lag_feats=["diff", "pdiff", "lag"],
+    index_name=cfg_data["stocks"] + "_avg",
     data_dir="/Users/davidschneider/data/daytradeai/prd/preprocessed",
 )
 
