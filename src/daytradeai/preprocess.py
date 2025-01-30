@@ -1,5 +1,6 @@
 from logging import getLogger, basicConfig, INFO
 import os
+import glob
 from typing import Any, Dict, List
 import pandas as pd
 from daytradeai.stocks import get_tickers
@@ -29,8 +30,7 @@ def preprocess_data(
             df=df,
             tickers=tickers_plus_cash,
             feat=lag_feat,
-            anchor_days=preprocess_cfg["anchor_days"],
-            lag_days=preprocess_cfg["lag_days"],
+            anchor_and_lags=preprocess_cfg["anchor_and_lags"],
         )
     df = label_beat_index_1d(df, tickers_plus_cash, preprocess_cfg)
     return df
@@ -42,14 +42,18 @@ def add_cash_fund(df: pd.DataFrame) -> pd.DataFrame:
     return df
 
 
-def add_lag_feat(df, tickers, feat, anchor_days, lag_days):
+def get_feat_name(col, feat, anchor, lag):
+    return f"{col}_{feat}_{anchor}d_{lag}d"
+
+
+def add_lag_feat(df: pd.DataFrame, tickers: List[str], feat: str, anchor_and_lags: Dict[int, List[int]]) -> pd.DataFrame:
     logger.info(f"Adding {feat} lag features")
-    for anchor in anchor_days:
-        for lag in lag_days:
+    for anchor, lags in anchor_and_lags.items():
+        for lag in lags:
             for col in tickers:
-                cur = df[col]
+                cur = df[col].shift(anchor) if anchor > 0 else df[col]
                 past = cur.shift(lag)
-                feature_name = f"{col}_{feat}_{anchor}d_{lag}d"
+                feature_name = get_feat_name(col=col, feat=feat, anchor=anchor, lag=lag)
                 if feat == "lag":
                     df[feature_name] = past
                 elif feat == "diff":
@@ -73,7 +77,7 @@ def label_beat_index_1d(
     # index performance
     for stock in stocks:
         # get next days performance of each stock in index
-        df[f"label_{stock}_pdiff_1f"] = df[f"{stock}_pdiff_0d_1d"].shift(-1)
+        df[f"label_{stock}_pdiff_1f"] = df[get_feat_name(col=stock, feat='pdiff', anchor=0, lag=1)].shift(-1)
     # assume index is equally weighted -
     # note this is note how DIJA or S&P500 is calculated (DIJA is price weighted, with divisor, S&P500 is market cap weighted)
     index_performance = df[[f"label_{stock}_pdiff_1f" for stock in stocks]].mean(axis=1)
@@ -98,11 +102,20 @@ def save_preprocessed(df: pd.DataFrame, cfg: Dict[str, Any]) -> None:
     df.to_parquet(output)
 
 
+def load_preprocessd(cfg: Dict[str, Any]) -> pd.DataFrame:
+    files = sorted(glob.glob(os.path.join(cfg["data_dir"], "*.parquet")), reverse=True)
+    if len(files) == 0:
+        raise FileNotFoundError(f"No preprocessed data found in {cfg['data_dir']}")
+    latest_file = files[0]
+    logger.info(f"Loading preprocessed data from {latest_file}")
+    return pd.read_parquet(latest_file)
+
+
 def get_feature_columns(df: pd.DataFrame, suffix: str, tickers: List[str]) -> List[str]:
     cols = [
         col for col in df.columns if col.endswith(suffix) and col.split("_")[0] in tickers
     ]
     assert (
         len(cols) > 0
-    ), f"No columns ending with {suffix} and starting with strings in tickers found, tickers={tickers[0:3] } ... {tickers[-3:]}"
+    ), f"No columns ending with {suffix} and starting with strings in tickers found, tickers={tickers[0:3]} ... {tickers[-3:]}"
     return cols

@@ -7,16 +7,20 @@ requires-python = ">=3.12"
 dependencies = [
     "fastparquet>=2024.11.0",
     "h5py>=3.12.1",
+    "ipympl>=0.9.6",
     "ipython>=8.31.0",
     "jupyter>=1.1.1",
     "matplotlib>=3.10.0",
+    "mplcursors>=0.6",
     "numpy>=2.2.1",
     "pandas>=2.2.3",
+    "plotly>=6.0.0",
     "pyarrow>=19.0.0",
     "pytest>=8.3.4",
     "pytest-mock>=3.14.0",
     "scikit-learn>=1.6.1",
     "scipy>=1.15.1",
+    "seaborn>=0.13.2",
     "torch>=2.5.1",
     "torchvision>=0.20.1",
     "yfinance>=0.2.51",
@@ -31,8 +35,10 @@ dev = [
     "typing>=3.10.0.0",
 ]
 
-[tool.pyright]
-exclude = ["**/*.ipynb"]
+# pylance still reported errors with this tool config
+# so a pyrightconfig.json was created
+# [tool.pyright]
+# exclude = ["**/*.ipynb"]
 
 [tool.flake8]
 max-line-length = 150
