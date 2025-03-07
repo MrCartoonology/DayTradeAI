@@ -1,4 +1,6 @@
 # DayTradeAI
+Work in Progress
+
 Experimenting with ML and AI for short term stock day trading
 
 # Setup
